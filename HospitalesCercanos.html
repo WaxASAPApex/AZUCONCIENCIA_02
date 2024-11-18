@@ -1,0 +1,157 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Hospitales cercanas</title>
+    <link rel="stylesheet" href="estilos/AYUDA.CSS" />
+    <style>
+        #map {
+            width: 100%;
+            height: 900px;
+            background-color: gray;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <!-- Encabezado de la página que puede contener logotipos u otros elementos visuales -->
+        <!-- Imagen que se muestra en el encabezado -->
+        <img src="imagenes/azucologo.jpeg" />
+
+        <!-- Líneas en blanco con <br> para separación visual -->
+        <br /><br />
+
+        <!-- Navegación principal de la página dentro de un elemento <nav> -->
+        <nav class="menu">
+            <!-- Lista no ordenada <ul> que contiene los enlaces de navegación -->
+            <ul>
+                <!-- Elementos de la lista <li> que contienen los enlaces <a> -->
+                <li><a href="Index.aspx">Inicio</a></li>
+                <li><a href="Consulta_Experiencias.aspx">Experiencias</a></li>
+                <li><a href="infodiabetes.aspx">Informacion acerca de la diabetes</a></li>
+                <li><a href="Alta_Citas.aspx">Consultas</a></li>
+                <li><a href="Informacion.aspx">Rutinas</a></li>
+                <li><a href="Autenticacion_Medicos.aspx">Cuenta</a></li>
+                <li><a href="AYUDA.aspx">Ayuda</a></li>
+                <li><a href="ClinicasCercanas.html">Buscar Clinicas Cercanas</a></li>
+            </ul>
+        </nav>
+
+    </header>
+    <div id="map">
+
+    </div>
+
+    <script>
+        (g => { var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement("script")); e.set("libraries", [...r] + ""); for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]); e.set("callback", c + ".maps." + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => h = n(Error(p + " could not load.")); a.nonce = m.querySelector("script[nonce]")?.nonce || ""; m.head.append(a) })); d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)) })
+            ({ key: "AIzaSyAJZ-R1XnOQ8Hj3HZOF8xexLN4pXJP9bOE", v: "weekly" });
+    </script>
+
+    <script async="async" type="module">
+        import { MarkerClusterer } from "https://cdn.skypack.dev/@googlemaps/markerclusterer@2.3.1"
+        async function initMap() {
+            // Librerias que se necesitan para importar la libreria de marcadores de google maps
+            const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+            const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker",);
+            //colocar el mapa en el contededor y aperturarlo en una ubicacion centrica
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 13,
+                center: { lat: 21.479478203591935, lng: - 104.86691249650566 },
+                mapId: "UT",
+            });
+            const infoWindow = new google.maps.InfoWindow({
+                content: "",
+                disableAutoPan: true,
+
+            });
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    var pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    }; //fin variable pos del tipo arreglo
+
+                    infoWindow.setPosition(pos);
+                    infoWindow.setContent('Aqui estás');
+                    infoWindow.open(map);
+                    map.setCenter(pos);
+                }, function () {
+                    handleLocationError(true, infoWindow, map.getCenter());
+                });
+            } //Fin del if principal
+            else {
+                handleLocationError(false, infoWindow, map.getCenter());
+            } //Fin del else
+
+            //CREAR UNA VARIABLE DE TIPO ARREGLO PARA DETERMINAR LOS CARACTERES ALFABETICOS QUE TENDRA CADA MARCADOR ENCONTRADO
+            const labels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            // Anade los marcadores al mapa
+            const markers = locations.map((position, i) => {
+                const label = labels[i % labels.length];
+                const pinGlyph = new google.maps.marker.PinElement({
+                    glyph: label,
+                    glyphColor: "white",
+                });
+                const marker = new google.maps.marker.AdvancedMarkerElement({
+                    position,
+                    content: pinGlyph.element,
+                });
+
+                // Espera que se le de un click al marcador para recargar el mapa con el marcador se expanda y se visualicen mas de cerca
+                marker.addListener("click", () => {
+                    infoWindow.setContent(position.lat + "," + position.lng);
+                    infoWindow.open(map, marker);
+
+                });
+                return marker;
+            });
+
+            // Se agregan los marcador al mapa segun el recorrido del arreglo
+            new MarkerClusterer({ markers, map });
+
+        }//fin funcion iniMap
+
+        //asignar las latitudes y longitudes a marcar en el mapa
+
+        const locations = [
+            { lat: 21.445848901367906, lng: -104.89821694520113 },
+            { lat: 21.443635441834374, lng: -104.89263418898352 },
+            { lat: 21.51343062260678, lng: -104.91065194138945 },
+            { lat: 21.500064396018445, lng: -104.89667315349716 },
+            { lat: 21.50181178074677, lng: -104.89646625277594 },
+            { lat: 21.493316162173628, lng: -104.88685487670153 },
+            { lat: 21.495433194567703, lng: -104.89407523007488 },
+            { lat: 21.506731456280477, lng: -104.90130597117931 },
+            { lat: 21.502014670216976, lng: - 104.89748384725374 },
+            { lat: 21.508600751486977, lng: -104.92187122394041 },
+            { lat: 21.513427497949877, lng: -104.91057184909052 },
+            { lat: 21.48045001142469, lng: -104.84958950001483 },
+            { lat: 21.514023028261317, lng: -104.81362275921325 }
+        ];
+
+        initMap();
+
+    </script>
+    <footer>
+        <div class="cont">
+            <h2>Contactanos</h2>
+            <hr class="sep" />
+            <ul>
+                <li><img src="imagenes/correo.png" alt="Logo Correo" height="30" /><a href="#"> Correo</a></li>
+                <li><img src="imagenes/tel.png" alt="logo telefono" height="30" /><a href="#"> Telefono</a></li>
+                <li><img src="imagenes/facebook.png" alt="logo facebook" height="30" /><a href="#"> Facebook</a></li>
+            </ul>
+        </div>
+        <div class="cont">
+            <h2>Informacion</h2>
+            <hr class="sep" />
+            <ul>
+                <li><a href="#">Terminos y Condiciones</a></li>
+                <li><a href="#">Politica de Privacidad</a></li>
+            </ul>
+        </div>
+    </footer>
+</body>
+</html>
